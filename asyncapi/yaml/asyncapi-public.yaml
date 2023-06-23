@@ -1,0 +1,149 @@
+asyncapi: 2.6.0
+info:
+  title: Milkman Driver Service Async API
+  version: 1.1.0
+  description: >
+    The Driver Service Async API allows receiving real-time notifications about
+    Milkman platform events.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  production:
+    url: wss://app.{tenant}.milkmantechnologies.com:443/mqtt/wsk
+    protocol: mqtt
+    protocolVersion: 5,
+    description: Production Mqtt Server over secure websocket
+    variables:
+      tenant:
+        description: The tenant identifier code
+    security:
+      - basic-with-auth-token: []
+    bindings:
+      mqtt:
+        qos: 1
+defaultContentType: application/json
+channels:
+  mds/tenants/{tenant}/notifications:
+    description: >-
+      The topic on which all notifications are published by Milkman Driver
+      Service.
+    parameters:
+      tenant:
+        $ref: '#/components/parameters/tenant'
+    subscribe:
+      operationId: getNotifications
+      traits:
+        - $ref: '#/components/operationTraits/mqtt'
+      message:
+        $ref: '#/components/messages/mqttNotification'
+    bindings:
+      mqtt:
+        enabled: Enabled only on ServerToServer feature = true
+  mds/tenants/{tenant}/notifications/{installationId}:
+    description: >-
+      The topic on which all notifications are published by Milkman Driver
+      Service.
+    parameters:
+      tenant:
+        $ref: '#/components/parameters/tenant'
+      installationId:
+        $ref: '#/components/parameters/installationId'
+    subscribe:
+      operationId: getDeviceNotifications
+      traits:
+        - $ref: '#/components/operationTraits/mqtt'
+      message:
+        $ref: '#/components/messages/mqttNotification'
+    bindings:
+      mqtt:
+        enabled: Enabled only on ServerToServer feature = false
+components:
+  messages:
+    mqttNotification:
+      name: mqttNotification
+      title: Notification about a platform event.
+      summary: >-
+        Informs the client that an event has occurred and suggests an action to
+        do.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/mqttNotificationPayload'
+      headers:
+        type: object
+        properties:
+          X-Driver:
+            type: string
+            examples:
+              - driver1@emaildomain.com
+            description: Username of the driver that needs to be notified.
+          X-Installation-ID:
+            type: string
+            examples:
+              - android-unique-id-4de37138
+            description: Unique identifier of the device that needs to be notified.
+          Correlation-Data:
+            type: string
+            examples:
+              - 31a82238-7138-4de3-97cc-7d3758b5d0e5
+            description: Correlation ID.
+  parameters:
+    tenant:
+      description: The tenant code, the same used in server url
+      schema:
+        type: string
+    installationId:
+      description: Unique identifier of the device that needs to be notified.
+      schema:
+        type: string
+  schemas:
+    mqttNotificationPayload:
+      type: object
+      properties:
+        mqttNotificationType:
+          type: string
+          enum:
+            - UPDATE_ROUTE
+            - DELETE_ROUTE
+            - LOGOUT
+            - UPDATE_CONFIGURATION
+          description: >-
+            The field indicates the action that the subscriber | should take in
+            response to a platform event.
+          examples:
+            - UPDATE_ROUTE
+        installationId:
+          type: string
+          description: Unique identifier of the device that needs to be notified.
+          examples:
+            - 31a82238-7138-4de3-97cc-7d3758b5d0e5
+        notificationParams:
+          type: object
+          $ref: '#/components/schemas/stringObjectMap'
+    stringObjectMap:
+      type: object
+      additionalProperties:
+        type:
+          - string
+          - number
+          - object
+      examples:
+        - routeId: 12345
+          reason: UPDATE_FROM_PLATFORM
+  securitySchemes:
+    basic-with-auth-token:
+      type: userPassword
+      description: >
+        Provide your credentials to authentication server to obtain a valid
+        token 
+
+        that you can use as username and leave the password empty.
+      x-configs:
+        bwct.tokenUrl: https://auth.milkmantechnologies.com/driverApp/login
+        bwct.username: '{{AUTH_ID_TOKEN}}'
+        bwct.password: anything_you_want
+  operationTraits:
+    mqtt:
+      bindings:
+        mqtt:
+          qos: 1
