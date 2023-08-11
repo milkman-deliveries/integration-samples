@@ -8,8 +8,8 @@ import java.util.Map;
 @Data
 @Builder
 @Jacksonized
-public class MqttPayload {
-    MqttNotificationType mqttNotificationType;
+public class NotificationPayload {
+    NotificationType notificationType;
     String installationId;
     Map<String, Object> notificationParams;
 }

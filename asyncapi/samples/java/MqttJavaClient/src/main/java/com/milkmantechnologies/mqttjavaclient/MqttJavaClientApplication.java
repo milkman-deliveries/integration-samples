@@ -7,7 +7,7 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
-import model.MqttPayload;
+import model.NotificationPayload;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -95,8 +95,8 @@ public class MqttJavaClientApplication implements CommandLineRunner {
 			System.out.println("Payload: " + json);
 
 			try {
-				MqttPayload payload = mapper.readValue(json, MqttPayload.class);
-				System.out.println("NotificationType: " + payload.getMqttNotificationType());
+				NotificationPayload payload = mapper.readValue(json, NotificationPayload.class);
+				System.out.println("NotificationType: " + payload.getNotificationType());
 				System.out.println("Object toString(): " + payload);
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
