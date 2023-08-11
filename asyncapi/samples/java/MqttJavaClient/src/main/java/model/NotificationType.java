@@ -1,6 +1,6 @@
 package model;
 
-public enum MqttNotificationType {
+public enum NotificationType {
     UPDATE_ROUTE,
     DELETE_ROUTE,
     LOGOUT,

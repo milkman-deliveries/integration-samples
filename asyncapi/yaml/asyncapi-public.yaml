@@ -1,7 +1,7 @@
 asyncapi: 2.6.0
 info:
   title: Milkman Driver Service Async API
-  version: 1.1.0
+  version: 1.1.1
   description: >
     The Driver Service Async API allows receiving real-time notifications about
     Milkman platform events.
@@ -36,7 +36,7 @@ channels:
       traits:
         - $ref: '#/components/operationTraits/mqtt'
       message:
-        $ref: '#/components/messages/mqttNotification'
+        $ref: '#/components/messages/notification'
     bindings:
       mqtt:
         enabled: Enabled only on ServerToServer feature = true
@@ -54,34 +54,56 @@ channels:
       traits:
         - $ref: '#/components/operationTraits/mqtt'
       message:
-        $ref: '#/components/messages/mqttNotification'
+        $ref: '#/components/messages/notification'
     bindings:
       mqtt:
         enabled: Enabled only on ServerToServer feature = false
 components:
   messages:
-    mqttNotification:
-      name: mqttNotification
+    notification:
+      name: notification
       title: Notification about a platform event.
       summary: >-
         Informs the client that an event has occurred and suggests an action to
         do.
       contentType: application/json
       payload:
-        $ref: '#/components/schemas/mqttNotificationPayload'
+        $ref: '#/components/schemas/notificationPayload'
       headers:
         type: object
+        required:
+          - notificationType
+          - username
+          - installationId
+          - routeId
         properties:
-          X-Driver:
+          notificationType:
+            type: string
+            enum:
+              - UPDATE_ROUTE
+              - DELETE_ROUTE
+              - LOGOUT
+              - UPDATE_CONFIGURATION
+            description: >-
+              The field indicates the action that the subscriber | should take in
+              response to a platform event.
+            examples:
+              - UPDATE_ROUTE
+          username:
             type: string
             examples:
               - driver1@emaildomain.com
             description: Username of the driver that needs to be notified.
-          X-Installation-ID:
+          installationId:
             type: string
             examples:
               - android-unique-id-4de37138
             description: Unique identifier of the device that needs to be notified.
+          routeId:
+            type: integer
+            description: Unique identifier of the route
+            examples:
+              - 181219
           Correlation-Data:
             type: string
             examples:
@@ -97,10 +119,10 @@ components:
       schema:
         type: string
   schemas:
-    mqttNotificationPayload:
+    notificationPayload:
       type: object
       properties:
-        mqttNotificationType:
+        notificationType:
           type: string
           enum:
             - UPDATE_ROUTE

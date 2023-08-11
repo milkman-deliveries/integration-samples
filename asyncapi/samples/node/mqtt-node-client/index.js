@@ -64,9 +64,9 @@ client.on('message', (topic, payload, packet) => {
     }
   }
 
-  const mqttNotification = JSON.parse(json);
-  const {mqttNotificationType, installationId, notificationParams} = mqttNotification;
-  console.log("Notification Type: " + mqttNotificationType);
+  const notificationPayload = JSON.parse(json);
+  const {notificationType, installationId, notificationParams} = notificationPayload;
+  console.log("Notification Type: " + notificationType);
   console.log("Installation ID: " + installationId);
   for (let key in notificationParams) {
     console.log("Param " + key + " = " + notificationParams[key]);
